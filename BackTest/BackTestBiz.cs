@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 
@@ -6,46 +7,52 @@ namespace BackTest
 {
     class BackTestBiz
     {
-
-        public static void Run(Dictionary<string, List<PriceStore>> timeseries)
+        public static void Run(Dictionary<string, List<PricingData>> timeseries, double capital)
         {
-            List<PriceStore> ps = timeseries["BABA"];
-            List<StockOrder> stockOrder = new List<StockOrder>();
-            bool flagBuy = false;
-            bool flagSell = true;
-            double capital = 10000;
-            double quantity = 0;
+            List<PricingData> ps = timeseries["BABA"];
+            List<Order> stockOrder = new List<Order>();
 
+            bool flagBuy = false;
+             
             for (int i=0; i<ps.Count-1; i++)
             {
-                if ((ps[i].ClosePrice > (ps[i+1].ClosePrice)*1.03) && flagSell==true)
+                double previousPrice = ps[i].ClosePrice;
+                double currentPrice = ps[i+1].ClosePrice;
+                DateTime currentDate = ps[i + 1].Date;
+                int quantity = 0;
+                if ((previousPrice > currentPrice *1.03) && flagBuy == false)
                 {
                     flagBuy = true;
-                    quantity = capital / ps[i+1].ClosePrice;
-                    flagSell = false;
-                    stockOrder.Add(new StockOrder(capital, quantity, ps[i + 1].ClosePrice, true));
-
-                    Console.WriteLine("Order in " + (i + 1) + " day: " +
-                        "Capital: " + capital +
-                        "Price: " + ps[i + 1].ClosePrice +
-                        "Quantity: " + quantity +
-                        "Status: " + "Buy");
+                    quantity = (int)(capital / currentPrice);
+                    if (quantity > 0)
+                    {
+                        capital -= quantity * currentPrice;
+                        stockOrder.Add(new Order(quantity, currentPrice, currentDate, OrderType.BUY));
+                    }
+                    else
+                    {
+                        Console.WriteLine("Your capital is not enough to buy one stock.");
+                    }
+                   
                 }
-                if ((ps[i].ClosePrice < (ps[i + 1].ClosePrice) * 1.05) && flagBuy == true)
+                else if (flagBuy == true && quantity > 0)
                 {
-                    flagSell = true;
-                    capital = quantity * ps[i + 1].ClosePrice;
-                    flagBuy = false;
-                    stockOrder.Add(new StockOrder(capital, quantity, ps[i + 1].ClosePrice, false));
+                    quantity = stockOrder.LastOrDefault().Quantity;
+                    double buyPrice = stockOrder.Last().TransactionPrice;
 
-                    Console.WriteLine("Order in " + (i + 1) + " day: " +
-                       "Capital: " + capital +
-                        "Price: " + ps[i + 1].ClosePrice +
-                        "Quantity: " + quantity +
-                        "Status: " + "sell");
+                    if (currentPrice > buyPrice * 1.05)
+                    {
+                        capital += quantity * currentPrice;
+                        flagBuy = false;
+                        stockOrder.Add(new Order(quantity, currentPrice, currentDate, OrderType.SELL));
+
+                        //Console.WriteLine("Order Date " + currentDate.ToShortDateString() +
+                        //    " Capital: " + capital +
+                        //    " Price: " + currentPrice +
+                        //    " Quantity: " + quantity +
+                        //    " Type: " + "SELL");
+                    }
                 }
-                else
-                    continue;
             }
         }
     }

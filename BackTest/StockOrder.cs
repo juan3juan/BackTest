@@ -1,31 +1,45 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BackTest
 {
-    public class StockOrder
+    /// <summary>
+    /// Order Type
+    /// </summary>
+    public enum OrderType
     {
-        public double Capital;
-        public double Quantity;
-        public double Price;
-        public bool Status;
+        BUY,
+        SELL
+    }
+    /// <summary>
+    /// Class of Market Order
+    /// </summary>
+    public class Order
+    {
+        #region Property
+        /// <summary>
+        /// Order Quantity
+        /// </summary>
+        public int Quantity;
+        /// <summary>
+        /// Order Transaction Price
+        /// </summary>
+        public double TransactionPrice;
+        /// <summary>
+        /// Order Book Date
+        /// </summary>
+        public DateTime TransactionDate;
+        /// <summary>
+        /// Order Type. Sell or Buy
+        /// </summary>
+        public OrderType Type;
+        #endregion Property
 
-
-
-        public StockOrder(double capital, double quantity, double price, bool status)
+        public Order(int quantity, double price, DateTime date, OrderType type)
         {
-            Capital = capital;
             Quantity = quantity;
-            Price = price;
-            Status = status;
-        }
-
-        public static implicit operator List<object>(StockOrder v)
-        {
-            throw new NotImplementedException();
+            TransactionPrice = price;
+            TransactionDate = date;
+            Type = type;
         }
     }
 }
