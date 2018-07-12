@@ -4,11 +4,11 @@ namespace BackTest
 {
     class Program
     {
-        static Dictionary<string, List<PricingData>> timeSeries;
+        static Dictionary<string, List<PricingData>> timeSeries=new Dictionary<string, List<PricingData>>();
 
         static void Main(string[] args)
         {
-            if (timeSeries.Count == 0)
+            if (timeSeries.Count==0)
             {
                 DataAccess dataAccess = new DataAccess();
                 timeSeries = dataAccess.ReadDataFile();
@@ -25,7 +25,7 @@ namespace BackTest
             {
                 Console.WriteLine("The input is not valid.");
             }
-             
+            Console.WriteLine("Done!");
             Console.ReadLine();
         }
     } 

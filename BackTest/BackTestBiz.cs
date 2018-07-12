@@ -33,7 +33,13 @@ namespace BackTest
                     {
                         Console.WriteLine("Your capital is not enough to buy one stock.");
                     }
-                   
+
+                    Console.WriteLine("Order Date " + currentDate.ToShortDateString() +
+                                        " Capital: " + capital +
+                                        " Price: " + currentPrice +
+                                        " Quantity: " + quantity +
+                                        " Type: " + "BUY");
+
                 }
                 else if (flagBuy == true && quantity > 0)
                 {
@@ -46,11 +52,11 @@ namespace BackTest
                         flagBuy = false;
                         stockOrder.Add(new Order(quantity, currentPrice, currentDate, OrderType.SELL));
 
-                        //Console.WriteLine("Order Date " + currentDate.ToShortDateString() +
-                        //    " Capital: " + capital +
-                        //    " Price: " + currentPrice +
-                        //    " Quantity: " + quantity +
-                        //    " Type: " + "SELL");
+                        Console.WriteLine("Order Date " + currentDate.ToShortDateString() +
+                            " Capital: " + capital +
+                            " Price: " + currentPrice +
+                            " Quantity: " + quantity +
+                            " Type: " + "SELL");
                     }
                 }
             }
