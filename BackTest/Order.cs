@@ -17,9 +17,25 @@ namespace BackTest
     {
         #region Property
         /// <summary>
+        /// Identifier for the Security
+        /// </summary>
+        public string SecurityID;
+        /// <summary>
         /// Order Quantity
         /// </summary>
-        public int Quantity;
+        public int Quantity
+        {
+            set
+            {
+                quantity = value;
+            }
+            get
+            {
+                int direction=Type == OrderType.BUY ? 1 : -1;
+                return direction * quantity;
+            }
+        }
+        private int quantity;
         /// <summary>
         /// Order Transaction Price
         /// </summary>
@@ -33,9 +49,9 @@ namespace BackTest
         /// </summary>
         public OrderType Type;
         #endregion Property
-
-        public Order(int quantity, double price, DateTime date, OrderType type)
+        public Order(string securityID ,int quantity, double price, DateTime date, OrderType type)
         {
+            SecurityID = securityID;
             Quantity = quantity;
             TransactionPrice = price;
             TransactionDate = date;
