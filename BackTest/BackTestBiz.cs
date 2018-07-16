@@ -7,11 +7,36 @@ namespace BackTest
 {
     class BackTestBiz
     {
-        public static void Run(Dictionary<string, List<PricingData>> timeseries, double capital)
-        {
-            List<PricingData> ps = timeseries["BABA"];
-            List<Order> stockOrder = new List<Order>();
+        public static List<Order> orders = new List<Order>();
+        public static List<AccountLevelInfo> accountInfos = new List<AccountLevelInfo>();
 
+        private static List<Position> GetCurrentPositions(double currentPrice)
+        {
+            List<Position> Positions = new List<Position>();
+            foreach (var group in orders.GroupBy(o=>o.SecurityID))
+            {
+                int quantity = group.Sum(o => o.Quantity); //quantity has signal in order
+
+                if (quantity != 0)
+                {
+                    Position Position = new Position();
+                    Position.SecurityID = group.Key; 
+                    Position.Quantity = quantity;
+                    Position.CurrentPrice = currentPrice;
+                    Positions.Add(Position);
+                }
+            }
+
+            return Positions;
+
+        }
+
+        public static List<Order> Run(Dictionary<string, List<PricingData>> timeseries, double capital)
+        {
+            string key = "BABA";
+            List<PricingData> ps = timeseries[key];
+            double Cash = capital;
+            
             bool flagBuy = false;
              
             for (int i=0; i<ps.Count-1; i++)
@@ -19,15 +44,24 @@ namespace BackTest
                 double previousPrice = ps[i].ClosePrice;
                 double currentPrice = ps[i+1].ClosePrice;
                 DateTime currentDate = ps[i + 1].Date;
+
+                AccountLevelInfo currentAccountInfo = new AccountLevelInfo();
+                currentAccountInfo.Date = currentDate;
+                currentAccountInfo.CurrentCash = Cash;
+                currentAccountInfo.CurrentPositions = GetCurrentPositions(currentPrice);             
+                accountInfos.Add(currentAccountInfo);
+
+
                 int quantity = 0;
+
                 if ((previousPrice > currentPrice *1.03) && flagBuy == false)
                 {
                     flagBuy = true;
-                    quantity = (int)(capital / currentPrice);
+                    quantity = (int)(Cash / currentPrice);
                     if (quantity > 0)
                     {
-                        capital -= quantity * currentPrice;
-                        stockOrder.Add(new Order(quantity, currentPrice, currentDate, OrderType.BUY));
+                        Cash -= quantity * currentPrice;
+                        orders.Add(new Order(key, quantity, currentPrice, currentDate, OrderType.BUY));
                     }
                     else
                     {
@@ -41,16 +75,16 @@ namespace BackTest
                                         " Type: " + "BUY");
 
                 }
-                else if (flagBuy == true && quantity > 0)
+                else if (flagBuy == true)
                 {
-                    quantity = stockOrder.LastOrDefault().Quantity;
-                    double buyPrice = stockOrder.Last().TransactionPrice;
+                    quantity = orders.LastOrDefault().Quantity;
+                    double buyPrice = orders.Last().TransactionPrice;
 
                     if (currentPrice > buyPrice * 1.05)
                     {
-                        capital += quantity * currentPrice;
+                        Cash += quantity * currentPrice;
                         flagBuy = false;
-                        stockOrder.Add(new Order(quantity, currentPrice, currentDate, OrderType.SELL));
+                        orders.Add(new Order(key, quantity, currentPrice, currentDate, OrderType.SELL));
 
                         Console.WriteLine("Order Date " + currentDate.ToShortDateString() +
                             " Capital: " + capital +
@@ -60,6 +94,8 @@ namespace BackTest
                     }
                 }
             }
+
+            return orders;
         }
     }
 }

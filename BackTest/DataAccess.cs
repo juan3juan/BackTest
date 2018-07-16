@@ -7,6 +7,31 @@ namespace BackTest
 {
     public class DataAccess
     {
+        /// <summary>
+        /// This whole class is Static
+        /// </summary>
+        private DataAccess()
+        {
+
+        }
+
+        private static Dictionary<string, List<PricingData>> timeSeries = null;
+        public static Dictionary<string, List<PricingData>> TimeSeries
+        {
+            //private set   //private set here means no one can assign to TimeSeries 
+            //{
+            //    timeSeries = value;
+            //}
+            get
+            {
+                if (timeSeries ==null)
+                {
+                    ReadDataFile();
+                }
+                return timeSeries;
+            }
+        }
+
 
         #region Read Data from Excel File 
         //public void ReadDataExcel()
@@ -40,28 +65,40 @@ namespace BackTest
         //}
         #endregion
 
-        public Dictionary<string, List<PricingData>> ReadDataFile()
+        public static void ReadDataFile()
         {
-            Dictionary<string, List<PricingData>> timeSeries = new Dictionary<string, List<PricingData>>();
-            string path = @"..\..\..\DataFile\BABA.txt";
+            if (timeSeries == null)
+            {
 
-            List<PricingData> ps = new List<PricingData>();
 
-            Console.WriteLine("Contents of text: ");
+                string path = @"..\..\..\DataFile\BABA.txt";
 
-            File.ReadAllLines(path).ToList().ForEach(line =>
-                        {
-                            string[] values = line.Split("\t");
-                            DateTime date;
-                            DateTime.TryParse(values[0].Trim(), out date);
-                            double priceStore;
-                            double.TryParse(values[1].Trim(), out priceStore);
-                            ps.Add(new PricingData(date, priceStore));
-                            Console.WriteLine(ps.Last().Date.ToString() + " " + ps.Last().ClosePrice.ToString());
-                        });
+                List<PricingData> ps = new List<PricingData>();
 
-            timeSeries.Add("BABA", ps);
-            return timeSeries;
+                Console.WriteLine("Contents of text: ");
+
+                File.ReadAllLines(path).ToList().ForEach(line =>
+                            {
+                                string[] values = line.Split("\t");
+                                DateTime date;
+                                DateTime.TryParse(values[0].Trim(), out date);
+                                double priceStore;
+                                double.TryParse(values[1].Trim(), out priceStore);
+                                ps.Add(new PricingData(date, priceStore));
+                                Console.WriteLine(ps.Last().Date.ToString() + " " + ps.Last().ClosePrice.ToString());
+                            });
+
+                timeSeries.Add("BABA", ps);
+            }
+        }
+
+        public static void Flush()
+        {
+            if(timeSeries != null)
+            {
+                timeSeries.Clear();
+                timeSeries = null;
+            }
         }
 
     }
