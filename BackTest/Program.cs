@@ -4,19 +4,17 @@ namespace BackTest
 {
     class Program
     {
-        static Dictionary<string, List<PricingData>> timeSeries=new Dictionary<string, List<PricingData>>();
         static List<Order> orders = new List<Order>();
         static List<AccountLevelInfo> accountInfos = new List<AccountLevelInfo>();
+        static Dictionary<string, Security> SecurityMaster = new Dictionary<string, Security>();
 
         static void Main(string[] args)
         {
-            if (timeSeries.Count==0)
-            {
-                timeSeries = DataAccess.TimeSeries;
-            }
-
+            
             double capital = 10000;
-            BackTestBiz.Run(timeSeries, capital);
+            SecurityMaster = DataAccess.SecurityMaster;
+
+            BackTestBiz.Run(SecurityMaster, capital);
             accountInfos = BackTestBiz.accountInfos;
             //Console.WriteLine("Please input your capital: ");
 

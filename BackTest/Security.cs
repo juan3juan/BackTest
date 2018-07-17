@@ -8,12 +8,19 @@ namespace BackTest
 {
     public class Security
     {
+        public Security(string securityID)
+        {
+            SecurityID = securityID;
+        }
+
         public string SecurityID;
+
+
+        public List<PricingData> SecurityPricingData;
+
 
         public double GetPrice(DateTime date)
         {
-            List<PricingData> pricingDatas = new List<PricingData>();
-            pricingDatas = DataAccess.TimeSeries[SecurityID];
             //double price = 0;
             //for(int i=0; i<pricingDatas.Count; i++)
             //{
@@ -39,7 +46,7 @@ namespace BackTest
 
 
             //return price.First();
-            return pricingDatas.Where(p => DateTime.Compare(date, p.Date) == 0)
+            return SecurityPricingData.Where(p => DateTime.Compare(date, p.Date) == 0)
                 .First()
                 .ClosePrice;
 

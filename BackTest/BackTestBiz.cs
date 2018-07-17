@@ -13,16 +13,15 @@ namespace BackTest
         private static List<Position> GetCurrentPositions(double currentPrice)
         {
             List<Position> Positions = new List<Position>();
-            foreach (var group in orders.GroupBy(o=>o.SecurityID))
+            foreach (var group in orders.GroupBy(o=>o.CurrentSecurity.SecurityID))
             {
                 int quantity = group.Sum(o => o.Quantity); //quantity has signal in order
 
                 if (quantity != 0)
                 {
                     Position Position = new Position();
-                    Position.SecurityID = group.Key; 
+                    Position.CurrentSecurity = group.First().CurrentSecurity; 
                     Position.Quantity = quantity;
-                    Position.CurrentPrice = currentPrice;
                     Positions.Add(Position);
                 }
             }
@@ -31,10 +30,11 @@ namespace BackTest
 
         }
 
-        public static List<Order> Run(Dictionary<string, List<PricingData>> timeseries, double capital)
+        public static List<Order> Run(Dictionary<string, Security> securityMaster, double capital)
         {
             string key = "BABA";
-            List<PricingData> ps = timeseries[key];
+            Security security = securityMaster[key];
+            List<PricingData> ps = security.SecurityPricingData;
             double Cash = capital;
             
             bool flagBuy = false;
@@ -61,7 +61,7 @@ namespace BackTest
                     if (quantity > 0)
                     {
                         Cash -= quantity * currentPrice;
-                        orders.Add(new Order(key, quantity, currentPrice, currentDate, OrderType.BUY));
+                        orders.Add(new Order(security, quantity, currentPrice, currentDate, OrderType.BUY));
                     }
                     else
                     {
@@ -84,7 +84,7 @@ namespace BackTest
                     {
                         Cash += quantity * currentPrice;
                         flagBuy = false;
-                        orders.Add(new Order(key, quantity, currentPrice, currentDate, OrderType.SELL));
+                        orders.Add(new Order(security, quantity, currentPrice, currentDate, OrderType.SELL));
 
                         Console.WriteLine("Order Date " + currentDate.ToShortDateString() +
                             " Capital: " + capital +

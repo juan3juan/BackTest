@@ -15,20 +15,18 @@ namespace BackTest
 
         }
 
-        private static Dictionary<string, List<PricingData>> timeSeries = null;
-        public static Dictionary<string, List<PricingData>> TimeSeries
+        private static Dictionary<string, Security> securityMaster = null;
+        public static Dictionary<string, Security> SecurityMaster
         {
-            //private set   //private set here means no one can assign to TimeSeries 
-            //{
-            //    timeSeries = value;
-            //}
             get
             {
-                if (timeSeries ==null)
+                if(securityMaster==null)
                 {
+                    // if not new, then the method will become a dead loop with SecurityMaster add
+                    securityMaster = new Dictionary<string, Security>();
                     ReadDataFile();
                 }
-                return timeSeries;
+                return securityMaster;
             }
         }
 
@@ -65,39 +63,46 @@ namespace BackTest
         //}
         #endregion
 
-        public static void ReadDataFile()
+        private static void ReadDataFile()
         {
-            if (timeSeries == null)
-            {
+            string securityKey = "BABA";
 
 
-                string path = @"..\..\..\DataFile\BABA.txt";
+            Security security = new Security(securityKey);
 
-                List<PricingData> ps = new List<PricingData>();
+            #region Load Security Pricing Data
+            string path = @"..\..\..\DataFile\BABA.txt";
 
-                Console.WriteLine("Contents of text: ");
+            List<PricingData> ps = new List<PricingData>();
 
-                File.ReadAllLines(path).ToList().ForEach(line =>
-                            {
-                                string[] values = line.Split("\t");
-                                DateTime date;
-                                DateTime.TryParse(values[0].Trim(), out date);
-                                double priceStore;
-                                double.TryParse(values[1].Trim(), out priceStore);
-                                ps.Add(new PricingData(date, priceStore));
-                                Console.WriteLine(ps.Last().Date.ToString() + " " + ps.Last().ClosePrice.ToString());
-                            });
+            Console.WriteLine("Contents of text: ");
 
-                timeSeries.Add("BABA", ps);
-            }
+            File.ReadAllLines(path).ToList().ForEach(line =>
+                        {
+                            string[] values = line.Split("\t");
+                            DateTime date;
+                            DateTime.TryParse(values[0].Trim(), out date);
+                            double priceStore;
+                            double.TryParse(values[1].Trim(), out priceStore);
+                            ps.Add(new PricingData(date, priceStore));
+                            Console.WriteLine(ps.Last().Date.ToString() + " " + ps.Last().ClosePrice.ToString());
+                        });
+            #endregion Load Security Pricing Data
+
+            security.SecurityPricingData = ps;
+
+            // securityMaster means add to securityMaster directly
+            // SecurityMaster means execute SecurityMaster Get method again, and then add to securityMaster
+            securityMaster.Add(securityKey, security);
+
         }
 
         public static void Flush()
         {
-            if(timeSeries != null)
+            if(SecurityMaster != null)
             {
-                timeSeries.Clear();
-                timeSeries = null;
+                //SecurityMaster.Clear();
+                securityMaster = null;
             }
         }
 

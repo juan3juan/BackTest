@@ -14,10 +14,10 @@ namespace BackTest
         {
             get
             {
-                double capitalFromPositionss = 0;
+                double capitalFromPositionss = 0; 
                 CurrentPositions.ForEach(p =>
-                {
-                    capitalFromPositionss += p.Quantity * p.CurrentPrice;
+                {                                
+                    capitalFromPositionss += p.Quantity * p.CurrentSecurity.GetPrice(Date);
 
                 });
                 return capitalFromPositionss+ CurrentCash;
