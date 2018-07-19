@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BackTest
+namespace BackTest.SecurityLib
 {
     /// <summary>
     /// Class used to store Security Prcing

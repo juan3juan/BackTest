@@ -1,4 +1,5 @@
 ﻿using System;
+using BackTest.SecurityLib;
 
 namespace BackTest
 {
@@ -23,18 +24,18 @@ namespace BackTest
         /// <summary>
         /// Order Quantity
         /// </summary>
-        public int Quantity
-        {
-            set
-            {
-                quantity = value;
-            }
-            get
-            {
-                int direction=Type == OrderType.BUY ? 1 : -1;
-                return direction * quantity;
-            }
-        }
+        public int Quantity;
+        //{
+            //set
+            //{
+            //    quantity = value;
+            //}
+            //get
+            //{
+            //    int direction=Type == OrderType.BUY ? 1 : -1;
+            //    return direction * quantity;
+            //}
+        //}
         private int quantity;
         /// <summary>
         /// Order Transaction Price

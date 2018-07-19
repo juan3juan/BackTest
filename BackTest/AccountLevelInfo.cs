@@ -6,10 +6,16 @@ using System.Threading.Tasks;
 
 namespace BackTest
 {
+    /// <summary>
+    /// Class used to store Account Info: Date, Cash, Capital
+    /// </summary>
     public class AccountLevelInfo
     {
         public DateTime Date;
         public double CurrentCash;
+        /// <summary>
+        /// CurrentCapital refers to Account capital in total in certain day
+        /// </summary>
         public double CurrentCapital
         {
             get

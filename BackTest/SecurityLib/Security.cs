@@ -4,10 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BackTest
+namespace BackTest.SecurityLib
 {
     public class Security
     {
+        /// <summary>
+        /// Class used to store security ID and getPrice
+        /// </summary>
+        /// <param name="securityID"></param>
         public Security(string securityID)
         {
             SecurityID = securityID;
@@ -18,7 +22,11 @@ namespace BackTest
 
         public List<PricingData> SecurityPricingData;
 
-
+        /// <summary>
+        /// return the price of certain position in certain date
+        /// </summary>
+        /// <param name="date">give the date want to calculate price</param>
+        /// <returns></returns>
         public double GetPrice(DateTime date)
         {
             //double price = 0;

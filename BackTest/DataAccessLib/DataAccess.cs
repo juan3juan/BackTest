@@ -2,14 +2,15 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using BackTest.SecurityLib;
 
-namespace BackTest
+namespace BackTest.DataAccessLib
 {
+    /// <summary>
+    /// This whole class is Static
+    /// </summary>
     public class DataAccess
     {
-        /// <summary>
-        /// This whole class is Static
-        /// </summary>
         private DataAccess()
         {
 
@@ -62,7 +63,9 @@ namespace BackTest
 
         //}
         #endregion
-
+        /// <summary>
+        /// Read data from file
+        /// </summary>
         private static void ReadDataFile()
         {
             string securityKey = "BABA";

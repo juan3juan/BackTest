@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using BackTest.SecurityLib;
+using BackTest.DataAccessLib;
+using AllocationEngine;
 namespace BackTest
 {
     class Program
@@ -13,8 +16,8 @@ namespace BackTest
             
             double capital = 10000;
             SecurityMaster = DataAccess.SecurityMaster;
-
-            BackTestBiz.Run(SecurityMaster, capital);
+            IStrategy Strategy = new SimpleStrategy(); 
+            BackTestBiz.Run(Strategy, SecurityMaster, capital);
             accountInfos = BackTestBiz.accountInfos;
             //Console.WriteLine("Please input your capital: ");
 
