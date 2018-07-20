@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using BackTest.SecurityLib;
+using System.Reflection;
 
-namespace BackTest.DataAccessLib
+namespace DataAccessLib
 {
     /// <summary>
     /// This whole class is Static
@@ -21,7 +21,7 @@ namespace BackTest.DataAccessLib
         {
             get
             {
-                if(securityMaster==null)
+                if (securityMaster == null)
                 {
                     // if not new, then the method will become a dead loop with SecurityMaster add
                     securityMaster = new Dictionary<string, Security>();
@@ -72,24 +72,24 @@ namespace BackTest.DataAccessLib
 
 
             Security security = new Security(securityKey);
-
+            var x = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
             #region Load Security Pricing Data
-            string path = @"..\..\..\DataFile\BABA.txt";
+            string path = @"..\..\..\DataAccess\DataFile\BABA.txt";
 
             List<PricingData> ps = new List<PricingData>();
 
             Console.WriteLine("Contents of text: ");
 
             File.ReadAllLines(path).ToList().ForEach(line =>
-                        {
-                            string[] values = line.Split("\t");
-                            DateTime date;
-                            DateTime.TryParse(values[0].Trim(), out date);
-                            double priceStore;
-                            double.TryParse(values[1].Trim(), out priceStore);
-                            ps.Add(new PricingData(date, priceStore));
-                            Console.WriteLine(ps.Last().Date.ToString() + " " + ps.Last().ClosePrice.ToString());
-                        });
+            {
+                string[] values = line.Split('\t');
+                DateTime date;
+                DateTime.TryParse(values[0].Trim(), out date);
+                double priceStore;
+                double.TryParse(values[1].Trim(), out priceStore);
+                ps.Add(new PricingData(date, priceStore));
+                Console.WriteLine(ps.Last().Date.ToString() + " " + ps.Last().ClosePrice.ToString());
+            });
             #endregion Load Security Pricing Data
 
             security.SecurityPricingData = ps;
@@ -102,7 +102,7 @@ namespace BackTest.DataAccessLib
 
         public static void Flush()
         {
-            if(SecurityMaster != null)
+            if (SecurityMaster != null)
             {
                 //SecurityMaster.Clear();
                 securityMaster = null;

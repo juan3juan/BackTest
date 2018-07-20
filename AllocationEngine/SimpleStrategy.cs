@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DataContract;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,44 +9,35 @@ namespace AllocationEngine
 {
     public class SimpleStrategy : IStrategy
     {
-        public Dictionary<string, int> ExecuteStrategy(double CurrentCash, Dictionary<string, int> CurrentPostions, Dictionary<string, double> BuyPrice, Dictionary<string, List<double>> CurrentPrice)
+        public Dictionary<string, int> ExecuteStrategy(StrategyDataContract dataContract)
         {
             Dictionary<string, int> result = new Dictionary<string, int>();
 
-            int quantity = 0;
-            string key = CurrentPrice.First().Key;
-            int currentposition = 0;
-            bool flagBuy = false;
-            List<double> pricehistory = CurrentPrice[key];
-            double currentPrice = pricehistory.Last();
-            double previousPrice = pricehistory[pricehistory.Count-2];
-            double Cash = CurrentCash;
-            double buyPrice = 0;
-            if (BuyPrice.ContainsKey(key))
-            {
-                currentposition = CurrentPostions[key];                
-                buyPrice = BuyPrice[key];
-                flagBuy = currentposition > 0 ? true : false;
-            }
+            SecPosition secPosition = dataContract.SecPositions.First();
+            string SecurityID = secPosition.SecurityID;
+            double cash = dataContract.CurrentCash;
+            List<double> priceHistory = secPosition.CurrentPrice;
+            double currentPrice = priceHistory.Last();
+            double previousPrice = priceHistory[priceHistory.Count - 2];
+            bool flagBuy = secPosition.PositionQuantity > 0 ? true : false;
 
             #region logic to buy or sell stock
             if ((previousPrice > currentPrice * 1.03) && flagBuy == false)
             {
+                #region Buy
                 flagBuy = true;
-                quantity = (int)(Cash / currentPrice);
-                result.Add(key, quantity);
+                int quantity = (int)(cash / currentPrice);
+                result.Add(SecurityID, quantity);
+                #endregion Buy
             }
             else if (flagBuy == true)
             {
-                if (currentPrice > buyPrice * 1.05)
+                #region Sell
+                if (currentPrice > secPosition.BuyPrice * 1.05)
                 {
-                    result.Add(key, -1*currentposition);
+                    result.Add(SecurityID, -1 * secPosition.PositionQuantity);
                 }
-            }
-
-            if (result.Count==0)
-            {
-                result.Add(key, 0);
+                #endregion Sell
             }
             #endregion logic to buy or sell stock
 

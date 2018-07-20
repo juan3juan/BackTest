@@ -1,6 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace BackTest.SecurityLib
+namespace DataAccessLib
 {
     /// <summary>
     /// Class used to store Security Prcing
@@ -23,6 +27,5 @@ namespace BackTest.SecurityLib
             Date = date;
             ClosePrice = closePrice;
         }
-
     }
 }

@@ -1,9 +1,13 @@
-﻿using System;
+﻿using AllocationEngine;
+using BackTest;
+using DataAccessLib;
+using System;
 using System.Collections.Generic;
-using BackTest.SecurityLib;
-using BackTest.DataAccessLib;
-using AllocationEngine;
-namespace BackTest
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace BackTestNet
 {
     class Program
     {
@@ -13,10 +17,10 @@ namespace BackTest
 
         static void Main(string[] args)
         {
-            
+
             double capital = 10000;
             SecurityMaster = DataAccess.SecurityMaster;
-            IStrategy Strategy = new SimpleStrategy(); 
+            IStrategy Strategy = new SimpleStrategy();
             BackTestBiz.Run(Strategy, SecurityMaster, capital);
             accountInfos = BackTestBiz.accountInfos;
             //Console.WriteLine("Please input your capital: ");
@@ -43,5 +47,5 @@ namespace BackTest
                 Console.WriteLine("Date: {0},  Cash: {1},  TotalCapital: {2}", info.Date, info.CurrentCash, info.CurrentCapital);
             }
         }
-    } 
+    }
 }

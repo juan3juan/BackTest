@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
-using BackTest.SecurityLib;
 using AllocationEngine;
+using DataContract;
+using DataAccessLib;
 
 namespace BackTest
 {
@@ -53,16 +54,10 @@ namespace BackTest
             List<PricingData> ps = security.SecurityPricingData;
             double Cash = capital;
             
-            bool flagBuy = false;
-            // traversal the data read in 
+            // loop through the data read in 
             for (int i=1; i<ps.Count; i++)
             {
-                double CurrentCash=Cash;
-                Dictionary<string, int> CurrentPostions=new Dictionary<string, int>();
-                Dictionary<string, List<double>> CurrentPrice=new Dictionary<string, List<double>>();
-                Dictionary<string, double> BuyPrice = new Dictionary<string, double>();
-
-                double previousPrice = ps[i-1].ClosePrice;
+                // params for Strategy
                 double currentPrice = ps[i].ClosePrice;
                 DateTime currentDate = ps[i].Date;
 
@@ -71,42 +66,58 @@ namespace BackTest
                 AccountLevelInfo currentAccountInfo = new AccountLevelInfo();
                 currentAccountInfo.Date = currentDate;
                 currentAccountInfo.CurrentCash = Cash;
-                currentAccountInfo.CurrentPositions = GetCurrentPositions(currentPrice);             
+                currentAccountInfo.CurrentPositions = GetCurrentPositions(currentPrice);
                 accountInfos.Add(currentAccountInfo);
                 #endregion store info to AccoutLevel
 
-                currentAccountInfo.CurrentPositions.ForEach(p => CurrentPostions.Add(p.CurrentSecurity.SecurityID, p.Quantity));
-                CurrentPrice.Add(key, ps.Where(p=>DateTime.Compare(p.Date,currentDate)<=0).Select(p=>p.ClosePrice).ToList());
-                if (CurrentPostions.Count>0)
+                #region Build DataContract
+                StrategyDataContract dataContract = new StrategyDataContract();
+                dataContract.CurrentCash = Cash;
+                SecPosition secPosition = new SecPosition();
+                secPosition.SecurityID = key;
+                secPosition.CurrentPrice = ps.Where(p => DateTime.Compare(p.Date, currentDate) <= 0)
+                             .Select(p => p.ClosePrice)
+                             .ToList();
+
+                if (currentAccountInfo.CurrentPositions.Count > 0)
                 {
-                    BuyPrice.Add(key, orders.Last().TransactionPrice);
+                    secPosition.BuyPrice = orders.Last().TransactionPrice;
+                    secPosition.PositionQuantity = currentAccountInfo.CurrentPositions.First().Quantity;
                 }
 
-                Dictionary<string, int> result= Strategy.ExecuteStrategy(CurrentCash, CurrentPostions, BuyPrice, CurrentPrice);
+                //Fill the DataContract that will be sent to Allocation Engine
+                dataContract.SecPositions.Add(secPosition);
 
-                int quan = result.First().Value;
-                if (quan > 0)
+                #endregion Build DataContract
+
+                #region Run Strategy
+                Dictionary<string, int> result = Strategy.ExecuteStrategy(dataContract);
+                #endregion Run Strategy
+
+                #region Create Order by the Quantity returned by the AllocationEngine
+                int quantity = result.Count > 0 ? result.First().Value : 0;
+                if (quantity > 0)
                 {
-                    Cash -= quan * currentPrice;
-                    orders.Add(new Order(security, quan, currentPrice, currentDate, OrderType.BUY));
+                    Cash -= quantity * currentPrice;
+                    orders.Add(new Order(security, quantity, currentPrice, currentDate, OrderType.BUY));
                     Console.WriteLine("Order Date " + currentDate.ToShortDateString() +
                     " Capital: " + capital +
                     " Price: " + currentPrice +
-                    " Quantity: " + quan +
+                    " Quantity: " + quantity +
                     " Type: " + "BUY");
                 }
-                else if (quan<0)
+                else if (quantity<0)
                 {
-                    Cash -= quan * currentPrice;
-                    orders.Add(new Order(security, quan, currentPrice, currentDate, OrderType.SELL));
+                    Cash -= quantity * currentPrice;
+                    orders.Add(new Order(security, quantity, currentPrice, currentDate, OrderType.SELL));
                     Console.WriteLine("Order Date " + currentDate.ToShortDateString() +
                                         " Capital: " + capital +
                                         " Price: " + currentPrice +
-                                        " Quantity: " + quan +
+                                        " Quantity: " + quantity +
                                         " Type: " + "SELL");
                 }
+                #endregion Create Order by the Quantity returned by the AllocationEngine
             }
-
             return orders;
         }
     }
