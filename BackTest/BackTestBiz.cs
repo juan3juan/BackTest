@@ -22,13 +22,15 @@ namespace BackTest
         /// </summary>
         /// <param name="currentPrice">refers to certain stock price in certain day</param>
         /// <returns></returns>
-        private static List<Position> GetCurrentPositions(double currentPrice)
+        private static List<Position> GetCurrentPositions(/*double currentPrice*/)
         {
             List<Position> Positions = new List<Position>();
             foreach (var group in orders.GroupBy(o=>o.CurrentSecurity.SecurityID))
             {
-                //quantity has signal in Order class
+                //first version-quantity has signal in Order class
+                //second version-realize in Strategy, Buy+, Sell-
                 int quantity = group.Sum(o => o.Quantity); 
+
                 
                 if (quantity != 0)
                 {
@@ -51,12 +53,12 @@ namespace BackTest
         /// <returns></returns>
         public static List<Order> Run(IStrategy Strategy,Dictionary<string, Security> securityMaster, double capital)
         {
-            string key = "BABA";
+            string key = securityMaster.First().Key;
             Security security = securityMaster[key];
             List<PricingData> ps = security.SecurityPricingData;
             double Cash = capital;
             
-            // loop through the data read in 
+            // loop through the data read in
             for (int i=1; i<ps.Count; i++)
             {
                 // params for Strategy
@@ -68,7 +70,7 @@ namespace BackTest
                 AccountLevelInfo currentAccountInfo = new AccountLevelInfo();
                 currentAccountInfo.Date = currentDate;
                 currentAccountInfo.CurrentCash = Cash;
-                currentAccountInfo.CurrentPositions = GetCurrentPositions(currentPrice);
+                currentAccountInfo.CurrentPositions = GetCurrentPositions(/*currentPrice*/);
                 accountInfos.Add(currentAccountInfo);
                 #endregion store info to AccoutLevel
 
@@ -89,24 +91,23 @@ namespace BackTest
 
                 //Fill the DataContract that will be sent to Allocation Engine
                 dataContract.SecPositions.Add(secPosition);
-
                 #endregion Build DataContract
+
                 #region Run Strategy
                 //Dictionary<string, int> result = Strategy.ExecuteStrategy(dataContract);
-                string servicecresult=strategyService(dataContract);
+                string serviceresult=strategyService(dataContract);
                 Dictionary<string, int> result = null;//Strategy.ExecuteStrategy(dataContract);
-                if (servicecresult!=string.Empty)
+                if (serviceresult!=string.Empty)
                 {
                     try
                     {
-                        result = JsonConvert.DeserializeObject<Dictionary<string, int>>(servicecresult);
+                        result = JsonConvert.DeserializeObject<Dictionary<string, int>>(serviceresult);
                     }
                     catch(Exception ex)
                     {
                         result = new Dictionary<string, int>();
                     }
                 }
-                string x = JsonConvert.SerializeObject(dataContract);
                 #endregion Run Strategy
 
                 #region Create Order by the Quantity returned by the AllocationEngine
@@ -142,8 +143,9 @@ namespace BackTest
             // client.Authenticator = new HttpBasicAuthenticator(username, password);
 
             var request = new RestRequest("Strategy", Method.POST);
-            
-            request.AddJsonBody(JsonConvert.SerializeObject(dataContract));
+
+            //request.AddJsonBody(JsonConvert.SerializeObject(dataContract));
+            request.AddJsonBody(dataContract);
 
             IRestResponse response = client.Execute(request);
             if (response.StatusCode == System.Net.HttpStatusCode.OK)
