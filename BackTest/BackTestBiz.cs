@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using AllocationEngine;
 using DataContract;
 using DataAccessLib;
+using Newtonsoft.Json;
+using RestSharp;
 
 namespace BackTest
 {
@@ -89,9 +91,22 @@ namespace BackTest
                 dataContract.SecPositions.Add(secPosition);
 
                 #endregion Build DataContract
-
                 #region Run Strategy
-                Dictionary<string, int> result = Strategy.ExecuteStrategy(dataContract);
+                //Dictionary<string, int> result = Strategy.ExecuteStrategy(dataContract);
+                string servicecresult=strategyService(dataContract);
+                Dictionary<string, int> result = null;//Strategy.ExecuteStrategy(dataContract);
+                if (servicecresult!=string.Empty)
+                {
+                    try
+                    {
+                        result = JsonConvert.DeserializeObject<Dictionary<string, int>>(servicecresult);
+                    }
+                    catch(Exception ex)
+                    {
+                        result = new Dictionary<string, int>();
+                    }
+                }
+                string x = JsonConvert.SerializeObject(dataContract);
                 #endregion Run Strategy
 
                 #region Create Order by the Quantity returned by the AllocationEngine
@@ -119,6 +134,23 @@ namespace BackTest
                 #endregion Create Order by the Quantity returned by the AllocationEngine
             }
             return orders;
+        }
+
+        private static string strategyService(StrategyDataContract dataContract)
+        {
+            var client = new RestClient("https://localhost:44332/api/AllocationEngine");
+            // client.Authenticator = new HttpBasicAuthenticator(username, password);
+
+            var request = new RestRequest("Strategy", Method.POST);
+            
+            request.AddJsonBody(JsonConvert.SerializeObject(dataContract));
+
+            IRestResponse response = client.Execute(request);
+            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+                return response.Content; // raw content as string
+            }
+            return string.Empty;
         }
     }
 }
