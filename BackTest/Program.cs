@@ -1,23 +1,27 @@
-﻿using System;
+﻿using AllocationEngine;
+using BackTest;
+using DataAccessLib;
+using System;
 using System.Collections.Generic;
-namespace BackTest
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace BackTestNet
 {
     class Program
     {
-        static Dictionary<string, List<PricingData>> timeSeries=new Dictionary<string, List<PricingData>>();
         static List<Order> orders = new List<Order>();
         static List<AccountLevelInfo> accountInfos = new List<AccountLevelInfo>();
+        static Dictionary<string, Security> SecurityMaster = new Dictionary<string, Security>();
 
         static void Main(string[] args)
         {
-            if (timeSeries.Count==0)
-            {
-                DataAccess dataAccess = new DataAccess();
-                timeSeries = dataAccess.ReadDataFile();
-            }
 
             double capital = 10000;
-            BackTestBiz.Run(timeSeries, capital);
+            SecurityMaster = DataAccess.SecurityMaster;
+            IStrategy Strategy = new SimpleStrategy();
+            BackTestBiz.Run(Strategy, SecurityMaster, capital);
             accountInfos = BackTestBiz.accountInfos;
             //Console.WriteLine("Please input your capital: ");
 
@@ -43,5 +47,5 @@ namespace BackTest
                 Console.WriteLine("Date: {0},  Cash: {1},  TotalCapital: {2}", info.Date, info.CurrentCash, info.CurrentCapital);
             }
         }
-    } 
+    }
 }

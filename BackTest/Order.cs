@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DataAccessLib;
+using System;
 
 namespace BackTest
 {
@@ -19,22 +20,22 @@ namespace BackTest
         /// <summary>
         /// Identifier for the Security
         /// </summary>
-        public string SecurityID;
+        public Security CurrentSecurity;
         /// <summary>
         /// Order Quantity
         /// </summary>
-        public int Quantity
-        {
-            set
-            {
-                quantity = value;
-            }
-            get
-            {
-                int direction=Type == OrderType.BUY ? 1 : -1;
-                return direction * quantity;
-            }
-        }
+        public int Quantity;
+        //{
+            //set
+            //{
+            //    quantity = value;
+            //}
+            //get
+            //{
+            //    int direction=Type == OrderType.BUY ? 1 : -1;
+            //    return direction * quantity;
+            //}
+        //}
         private int quantity;
         /// <summary>
         /// Order Transaction Price
@@ -49,9 +50,9 @@ namespace BackTest
         /// </summary>
         public OrderType Type;
         #endregion Property
-        public Order(string securityID ,int quantity, double price, DateTime date, OrderType type)
+        public Order(Security security ,int quantity, double price, DateTime date, OrderType type)
         {
-            SecurityID = securityID;
+            CurrentSecurity = security;
             Quantity = quantity;
             TransactionPrice = price;
             TransactionDate = date;
