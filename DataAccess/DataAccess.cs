@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using RestSharp;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -25,7 +27,7 @@ namespace DataAccessLib
                 {
                     // if not new, then the method will become a dead loop with SecurityMaster add
                     securityMaster = new Dictionary<string, Security>();
-                    ReadDataFile();
+                    DataFromService();
                 }
                 return securityMaster;
             }
@@ -97,6 +99,25 @@ namespace DataAccessLib
             // securityMaster means add to securityMaster directly
             // SecurityMaster means execute SecurityMaster Get method again, and then add to securityMaster
             securityMaster.Add(securityKey, security);
+
+        }
+
+        private static void DataFromService()
+        {
+            var client = new RestClient("https://localhost:44350/api/DataAccess");
+            // client.Authenticator = new HttpBasicAuthenticator(username, password);
+
+            var request = new RestRequest("DataFromFile", Method.GET);
+
+            //request.AddJsonBody(JsonConvert.SerializeObject(dataContract));
+            //request.AddJsonBody(dataContract);
+
+            //Dictionary<string, Security> result = null;
+            IRestResponse response = client.Execute(request);
+            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+                securityMaster = JsonConvert.DeserializeObject<Dictionary<string, Security>>(response.Content);
+            }
 
         }
 

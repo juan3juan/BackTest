@@ -20,7 +20,7 @@ namespace BackTestNet
 
             double capital = 10000;
             SecurityMaster = DataAccess.SecurityMaster;
-            IStrategy Strategy = new SimpleStrategy();
+            IStrategy Strategy = new StrategyService();
             BackTestBiz.Run(Strategy, SecurityMaster, capital);
             accountInfos = BackTestBiz.accountInfos;
             //Console.WriteLine("Please input your capital: ");
