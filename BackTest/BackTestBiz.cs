@@ -77,6 +77,7 @@ namespace BackTest
                 dataContract.CurrentCash = Cash;
                 SecPosition secPosition = new SecPosition();
                 secPosition.SecurityID = key;
+                secPosition.currentDate = currentDate;
                 secPosition.CurrentPrice = ps.Where(p => DateTime.Compare(p.Date, currentDate) <= 0)
                              .Select(p => p.ClosePrice)
                              .ToList();
