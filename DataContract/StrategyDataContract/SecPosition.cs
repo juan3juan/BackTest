@@ -11,6 +11,7 @@ namespace DataContract
         public string SecurityID;
         public int PositionQuantity;
         public double BuyPrice;
+        public DateTime currentDate;
         public List<double> CurrentPrice;
     }
 }

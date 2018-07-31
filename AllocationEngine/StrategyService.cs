@@ -17,7 +17,7 @@ namespace AllocationEngine
             var client = new RestClient("https://localhost:44332/api/AllocationEngine");
             // client.Authenticator = new HttpBasicAuthenticator(username, password);
 
-            var request = new RestRequest("Strategy", Method.POST);
+            var request = new RestRequest("ExecuteStrategy", Method.POST);
 
             //request.AddJsonBody(JsonConvert.SerializeObject(dataContract));
             request.AddJsonBody(dataContract);
